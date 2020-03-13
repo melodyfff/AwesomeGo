@@ -1,14 +1,19 @@
-package main
+package echo_web
 
 import (
 	"github.com/labstack/echo"
 	"net/http"
 )
 
-func main() {
-	e := echo.New()
+func Bind(e echo.Echo) {
+
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	e.Logger.Fatal(e.Start(":1323"))
+
+	e.GET("/json", JsonStringHandler)
+
+	e.GET("/html", HtmlStringHandler)
+
+	e.GET("/cookie", WriteCookie)
 }
