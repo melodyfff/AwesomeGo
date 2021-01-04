@@ -1,6 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
+
+// map 读线程安全，写则需要 sync.Map 保证线程安全
 
 func main() {
 	// var map_variable map[key_data_type] value_data_type = make(map[key_data_type] value_data_type , size)
@@ -25,4 +30,13 @@ func main() {
 
 	delete(m2, "2")
 	fmt.Println(m2) // map[1:test1]
+
+	// sync.Map 无需初始化
+	var syncMap sync.Map
+	syncMap.Store("ok", "ok")
+	syncMap.Store("ok2", "ok2")
+
+	fmt.Printf("%v\n", &syncMap)
+	fmt.Println(syncMap.Load("ok")) // ok true
+
 }
