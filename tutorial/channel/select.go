@@ -5,14 +5,16 @@ import (
 	"time"
 )
 
-func sender1(ch chan string) {
+// 接收只写的channel
+func sender1(ch chan<- string) {
 	for {
 		time.Sleep(3 * time.Second)
 		ch <- "ok from sender1"
 	}
 }
 
-func sender2(ch chan string) {
+// 接收只写的channel
+func sender2(ch chan<- string) {
 	for {
 		time.Sleep(1 * time.Second)
 		ch <- "ok from sender2"
