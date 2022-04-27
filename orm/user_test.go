@@ -28,6 +28,7 @@ func init() {
 	os.Setenv("DIALECT", "mysql")
 
 	if DB, err = OpenTestConnection(); err != nil {
+		// 终止程序运行
 		panic(fmt.Sprintf("No error should happen when connecting to test database, but got err=%+v", err))
 	}
 }
@@ -85,5 +86,5 @@ func TestSetTable(t *testing.T) {
 	//defer db.Close()
 	defer DB.Close()
 
-	Create(DB, &User{})
+	CreateTable(DB, &User{})
 }

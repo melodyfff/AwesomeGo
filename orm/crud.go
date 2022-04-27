@@ -2,7 +2,11 @@ package orm
 
 import "github.com/jinzhu/gorm"
 
-func Create(db *gorm.DB, value interface{}) {
+// golang1.18 后可以这样使用
+//func CreateTable(db *gorm.DB, value any) {
+// 这里的any等同于： type any = interfance{}
+
+func CreateTable(db *gorm.DB, value interface{}) {
 	//判断表是否存在
 	if db.HasTable(value) {
 		// 自动迁移数据结构(table schema)
@@ -12,4 +16,8 @@ func Create(db *gorm.DB, value interface{}) {
 	} else {
 		db.CreateTable(value) //不存在就创建新表
 	}
+}
+
+func Insert(db *gorm.DB, value interface{}) {
+	db.Create(value)
 }
