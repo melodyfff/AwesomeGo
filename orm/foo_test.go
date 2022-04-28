@@ -2,37 +2,51 @@ package orm
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"testing"
 )
 
-var (
-	TestDB *gorm.DB
-)
-
-func init() {
-	// 初始化db
-	// 创建gorm.DB对象的时候连接并没有被创建，在具体使用的时候才会创建。gorm内部，准确的说是database/sql内部会维护一个连接池，可以通过参数设置最大空闲连接数，连接最大空闲时间等。使用者不需要管连接的创建和关闭。
-	if db, err := gorm.Open("mysql", "root:123@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local"); err != nil {
-		panic(fmt.Sprintf("No error should happen when connecting to test database, but got err=%+v", err))
-	} else {
-		TestDB = db
-	}
-}
-
 func TestFooCrate(t *testing.T) {
-	CreateTable(TestDB, &Foo{})
+	CreateTable(DB, &Foo{})
 }
 
 func TestFooInsert(t *testing.T) {
-	Insert(TestDB, &Foo{Name: "ok", Email: "hello@qq.com", Sex: ""})
-	Insert(TestDB, &Foo{Name: "ok2", Email: "hello@qq.com", Sex: "FeMale"})
+	Insert(DB, &Foo{Name: "ok", Email: "hello@qq.com", Sex: ""})
+	Insert(DB, &Foo{Name: "ok2", Email: "hello@qq.com", Sex: "FeMale"})
+	Insert(DB, &Foo{Name: "ok3", Email: "hello@qq.com", Sex: "FeMale"})
 }
 
 func TestFooQuery(t *testing.T) {
-	q1 := TestDB.First(&Foo{})
+	// SELECT * FROM `foo`  WHERE `foo`.`deleted_at` IS NULL ORDER BY `foo`.`id` ASC LIMIT 1
+	q1 := DB.Debug().First(&Foo{})
 	fmt.Println(q1.Value)
 
-	q2 := TestDB.Where("name=?", "ok2").First(&Foo{})
+	// SELECT * FROM `foo`  WHERE `foo`.`deleted_at` IS NULL ORDER BY `foo`.`id` DESC LIMIT 1
+	q2 := DB.Debug().Last(&Foo{})
 	fmt.Println(q2.Value)
+
+	// SELECT * FROM `foo`  WHERE `foo`.`deleted_at` IS NULL LIMIT 1
+	q3 := DB.Debug().Take(&Foo{})
+	fmt.Println(q3.Value)
+
+	// 根据主键查询 SELECT * FROM `foo`  WHERE `foo`.`deleted_at` IS NULL AND ((`foo`.`id` = 3)) ORDER BY `foo`.`id` ASC LIMIT 1
+	q4 := DB.Debug().First(&Foo{}, 3)
+	fmt.Println(q4.Value)
+
+	// SELECT * FROM `foo`  WHERE `foo`.`deleted_at` IS NULL AND ((name like '%ok%'))
+	q5 := DB.Debug().Where("name like ?", "%ok%").Find(&[]Foo{})
+	fmt.Println(q5.Value)
+
+	// SELECT * FROM `foo`  WHERE `foo`.`deleted_at` IS NULL AND ((name in ('ok','ok2')))
+	q6 := DB.Debug().Where("name in (?)", []string{"ok", "ok2"}).Find(&[]Foo{})
+	fmt.Println(q6.Value)
+
+	// SELECT * FROM `foo`  WHERE `foo`.`deleted_at` IS NULL AND ((name='ok2')) ORDER BY `foo`.`id` ASC LIMIT 1
+	q7 := DB.Debug().Where("name=?", "ok2").First(&Foo{})
+	fmt.Println(q7.Value)
+
+	var count int
+	var tmp []Foo
+	DB.Debug().Where("name=?", "ok2").First(&tmp).Count(&count)
+	fmt.Println(count)
+	fmt.Println(tmp)
 }
